@@ -1,14 +1,58 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import (QApplication,QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit)
+from PyQt5.QtCore import Qt
+
+
+class Login(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("로그인")
+        self.setGeometry(500, 100, 800, 600)
+
+        self.title_label = QLabel("로그인")
+        self.title_label.setAlignCenter(Qt.AlignCenter)
+
+        self.id_label = QLabel("아이디")
+        self.id_input = QLineEdit(self)
+        self.id_input.setPlaceholderText("아이디를 입력하세요")
+
+        self.pw_label = QLabel("비밀번호")
+        self.pw_input = QLineEdit(self)
+        self.pw_input.setPlaceholderText("비밀번호를 입력하세요")
+
+        self.pw_input.setEchoMode(QLineEdit.Password)
+
+        self.login_btn = QPushButton("로그인")
+        self.login_btn.clicked.connect(self.check_login)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.id_label)
+        layout.addWidget(self.id_input)
+        layout.addWidget(self.pw_label)
+        layout.addWidget(self.pw_input)
+        layout.addWidget(self.login_btn)
+        self.setLayout(layout)
+
+def login(self):
+    user_id = self.id_input.text()
+    user_pw = self.pw_input.text()
+
+    if user_id == "60251838" and user_pw == "3933":
+        print("로그인 성공")
+    else:
+        print("ERROR")
+
 
 class MainWindow(QWidget): #메인 윈도우 클래스 정의 (QWidget 상속)
     def __init__(self):
         super().__init__() #부모 클래스(QWidget)의 초기화자 호출
         #윈도우 창 제목, 창의 위치와 크기를 숫자로 지정함
         self.setWindowTitle("공장 재고 관리 프로그램")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(500, 100, 800, 600) 
         #화면에 표시할 라벨 위젯 생성
         self.label=QLabel("공장 재고 관리 프로그램 실행", self)
+        self.label.setAlignment(Qt.AlignCenter)
         #버튼 생성
         self.btn1 = QPushButton("상품 등록")
         self.btn2 = QPushButton("상품 조회")
@@ -78,30 +122,9 @@ def update_stock():
 
 #프로그램의 시작
 if __name__=="__main__":
-    app=QApplication(sys.argv) #PyQt5 앱 객체 생성
-    window=MainWindow() # 메인 윈도우 인스턴스 생성
-    window.show() #윈도우 화면에 표시
-
-    #콘솔 기반 메뉴
-    while True:
-        print("1. 상품 등록")
-        print("2. 상품 조회")
-        print("3. 입출고 관리")
-        print("4. 종료")
-        choice=input("선택: ") #사용자 선택 입력
-
-
-        if choice == "상품 등록":
-            add_product()
-        elif choice == "상품 조회":
-            view_products()
-        elif choice == "입출고 관리":
-            update_stock()
-        elif choice == "종료":
-            print("프로그램을 종료합니다.")
-            break
-        else:
-            print("ERROR")
+    app=QApplication(sys.argv)
+    login = Login()
+    login.show()
 
     #PyQt 앱 실행 (이벤트 루프 시작)
     sys.exit(app.exec_())
