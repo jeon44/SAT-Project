@@ -1,9 +1,19 @@
-import sys
+import sys 
 from PyQt5.QtWidgets import (QApplication,QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QMessageBox,
                              QListWidget, QInputDialog)
 from PyQt5.QtCore import Qt
 
+
 products = []
+
+import shelve
+with shelve.open('products_db') as db:
+    products = db.get('products', [])
+
+
+def save_products():
+    with shelve.open('products_db') as db:
+        db['products'] = products
 
 class Login(QWidget):
     def __init__(self):
@@ -97,6 +107,8 @@ class AddProductWindow(QWidget):
         QMessageBox.information(self, "성공", f"{name} 상품이 등록되었습니다.")
         self.close()
 
+        save_products()
+
 class ViewProductWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -106,8 +118,15 @@ class ViewProductWindow(QWidget):
         self.list = QListWidget()
         self.load_products()
 
+        self.delete_btn = QPushButton("상품 삭제")
+        self.delete_btn.clicked.connect(self.delete_product)
+
+        self.delete_btn.setShortcut(Qt.Key_Return)
+        self.delete_btn.setShortcut(Qt.Key_Enter)
+
         layout = QVBoxLayout()
         layout.addWidget(self.list)
+        layout.addWidget(self.delete_btn)
         self.setLayout(layout)
 
     def load_products(self):
@@ -118,6 +137,22 @@ class ViewProductWindow(QWidget):
         else:
             for p in products:
                 self.list.addItem(f"{p['name']} - 재고 {p['qty']}개")
+
+    def delete_product(self):
+        selected = self.list.currentRow()
+
+        if selected == -1:
+            QMessageBox.warning(self, "오류", "삭제할 상품을 선택하세요.")
+            return
+        
+        name = products[selected]['name']
+        confirm = QMessageBox.question(self, "확인", f"{name} 상품을 삭제하시겠습니까?", QMessageBox.Yes | QMessageBox.No)
+
+        if confirm == QMessageBox.Yes:
+            del products[selected]
+            QMessageBox.information(self, "성공", f"{name} 상품이 삭제되었습니다.")
+            self.load_products()
+            save_products()
 
 
 class UpdateStockWindow(QWidget):
@@ -158,6 +193,9 @@ class UpdateStockWindow(QWidget):
             products[selected]['qty'] += value
             QMessageBox.information(self, "성공", f"{name}의 재고가 변경되었습니다.")
             self.load_products()
+
+        products[selected]['qty'] += value
+        save_products()
 
 class MainWindow(QWidget): #메인 윈도우 클래스 정의 (QWidget 상속)
     def __init__(self):
